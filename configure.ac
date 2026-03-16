@@ -15,7 +15,7 @@
 ## You should have received a copy of the GNU Lesser General Public License
 ## along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_INIT([libsigc++], [2.10.8],
+AC_INIT([libsigc++], [2.12.1],
         [https://github.com/libsigcplusplus/libsigcplusplus/issues/],
         [libsigc++], [https://libsigcplusplus.github.io/libsigcplusplus/])
 AC_PREREQ([2.59])
@@ -25,7 +25,7 @@ AC_CONFIG_AUX_DIR([build])
 AC_CONFIG_MACRO_DIR([build])
 AC_CONFIG_HEADERS([config.h sigc++config.h])
 
-AM_INIT_AUTOMAKE([1.9 -Wno-portability check-news no-dist-gzip dist-xz tar-ustar no-define nostdinc])
+AM_INIT_AUTOMAKE([1.9 -Wno-portability check-news no-dist-gzip dist-xz tar-ustar no-define nostdinc foreign])
 # Support silent build rules.
 # Disable by either passing --disable-silent-rules to configure or passing V=1 to make.
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
@@ -82,6 +82,8 @@ AS_IF([test "x$enable_benchmark" = xyes],[
   AX_BOOST_SYSTEM
   AX_BOOST_TIMER
 ])
+
+AC_SUBST(MSVC_STATIC_CXXFLAG, '')
 
 AC_CONFIG_FILES([Makefile
                  ${SIGCXX_MODULE_NAME}.pc:sigc++.pc.in

@@ -1,3 +1,51 @@
+2.12.1 (stable)
+
+Documentation:
+* slot, signal: Describe the slot<void(int)> syntax more
+  (Kjell Ahlstedt) Issue #86 (Daniel Boles)
+* connection: Improve the class documentation
+  (Kjell Ahlstedt) Issue #88 (Daniel Boles)
+* Improve Visual Studio build documentation
+  (Chun-wei Fan) Pull request #94
+* Remove AUTHORS and add general information to README.md
+  (Kjell Ahlstedt) Issue gtkmm#140
+
+Build:
+* Meson: Don't copy files with configure_file()
+  (Kjell Ahlstedt)
+* Meson: Fix the evaluation of is_git_build on Windows
+  (Kjell Ahlstedt) Issue gtkmm#131 (William Roy)
+* Visual Studio: Support static builds
+  Issue #90 (Swat-SomeBug)
+  (Chun-wei Fan) Pull request #92
+
+
+2.12.0 (stable)
+
+* Add track_object(), deprecate track_obj()
+  (Kjell Ahlstedt) Issue #78 (LordVolumeForm)
+
+Examples, tests:
+* examples/member_method: Make on_print() non-virtual
+  (Kjell Ahlstedt)
+* test_limit_reference.cc: Don't use auto where a slot is required
+  (Kjell Ahlstedt) Issue #44 (Murray Cumming)
+
+Build:
+* Meson: Avoid configuration warnings
+  (Kjell Ahlstedt)
+* Meson, MSVC: Compensate for the lack of msvc_recommended_pragmas.h
+  (Chun-wei Fan)
+* Fix build with -Dbuild-deprecated-api=false
+  (Kjell Ahlstedt) Issue #82 (bbhtt)
+* Meson: Detect if we build from a git subtree
+  (William Roy) Merge request gtkmm!72
+* Meson: Simplify lookup of python command
+  (wael444) Pull request #83
+* Meson: Add build_tests option
+  (Fabrice Fontaine) Pull request #84
+
+
 2.10.8 (stable)
 
 Build:
