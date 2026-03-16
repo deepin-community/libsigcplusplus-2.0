@@ -1,11 +1,11 @@
 # This file is part of libsigc++.
 
 project('libsigc++', 'cpp',
-  version: '2.10.8',
+  version: '2.12.1',
   license: 'LGPLv2.1+',
   default_options: [
     'cpp_std=c++11',
-    'warning_level=0',
+    'warning_level=1',
   ],
   meson_version: '>= 0.55.0', # required for meson.add_dist_script(python3, ...)
                               # and meson.add_install_script(python3, ...)
@@ -41,22 +41,35 @@ project_build_root = meson.current_build_dir()
 
 cpp_compiler = meson.get_compiler('cpp')
 is_msvc = cpp_compiler.get_id() == 'msvc'
-python3 = import('python').find_installation()
+python3 = find_program('python3', version: '>=3.5')
 
-python_version = python3.language_version()
-python_version_req = '>= 3.5'
-if not python_version.version_compare(python_version_req)
-  error('Requires Python @0@, found @1@.'.format(python_version_req, python_version))
+# MSVC: We currently do not support shared and static builds at the,
+#       same time, since we need different defines/cflags for proper
+#       linking.
+if is_msvc
+  if get_option('default_library') == 'both'
+    error('-Ddefault_library=both is currently not supported for Visual Studio')
+  endif
+  is_msvc_static = get_option('default_library') == 'static'
+else
+  is_msvc_static = false
 endif
 
 # Do we build from a git repository?
-# Suppose we do if and only if a '.git' directory or file exists.
+# Suppose we do if and only if the meson.build file is tracked by git.
 cmd_py = '''
-import os
-import sys
-sys.exit(os.path.isdir("@0@") or os.path.isfile("@0@"))
-'''.format(project_source_root / '.git')
-is_git_build = run_command(python3, '-c', cmd_py, check: false).returncode() != 0
+import shutil, subprocess, sys
+git_exe = shutil.which('git')
+if not git_exe:
+  sys.exit(1)
+cmd = [ git_exe, 'ls-files', '--error-unmatch', 'meson.build' ]
+sys.exit(subprocess.run(cmd, cwd=sys.argv[1], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode)
+'''
+is_git_build = run_command(
+  python3, '-c', cmd_py,
+  project_source_root,
+  check: false,
+).returncode() == 0
 
 # Are we testing a dist tarball while it's being built?
 # There ought to be a better way. https://github.com/mesonbuild/meson/issues/6866
@@ -70,15 +83,18 @@ maintainer_mode = maintainer_mode_opt == 'true' or \
 if is_dist_check
   message('Looks like a tarball is being tested. ' + \
           'Option "dist-warnings" is used instead of "warnings".')
-  warning_level = get_option('dist-warnings')
+  cpp_warnings = get_option('dist-warnings')
 else
-  warning_level = get_option('warnings')
+  cpp_warnings = get_option('warnings')
 endif
+warning_level = get_option('warning_level').to_int()
+werror = get_option('werror')
 build_deprecated_api = get_option('build-deprecated-api')
 build_documentation_opt = get_option('build-documentation')
 build_documentation = build_documentation_opt == 'true' or \
                      (build_documentation_opt == 'if-maintainer-mode' and maintainer_mode)
 build_examples = get_option('build-examples')
+build_tests = get_option('build-tests')
 do_benchmark = get_option('benchmark')
 
 # Installation directories are relative to {prefix}.
@@ -130,16 +146,8 @@ if maintainer_mode
     project_source_root / 'untracked' / 'docs',
     check: true,
   )
-else
-  cmd_py = '''
-import os
-import sys
-sys.exit(os.path.isfile("@0@"))
-'''.format(doc_reference)
-  file_exists = run_command(python3, '-c', cmd_py, check: false).returncode() != 0
-  if not file_exists
-    warning('Missing files in untracked/. You may have to enable maintainer-mode.')
-  endif
+elif not import('fs').is_file(doc_reference)
+  warning('Missing files in untracked/. You may have to enable maintainer-mode.')
 endif
 
 # Check if perl is required and available.
@@ -155,25 +163,24 @@ if not (doc_perl_prop.returncode() == 0 and doc_perl_prop.stdout() == 'false')
 endif
 
 # Set compiler warnings.
+# Meson warns if any of the /W1, /W2, /W3, /W4, /Wall, -Wall, -Wextra, -Werror
+# compiler options are added with add_project_arguments().
+# Avoid such warnings, when possible.
+# See _warn_about_builtin_args() in meson/mesonbuild/interpreter/interpreter.py.
 warning_flags = []
-if warning_level == 'min'
-  if is_msvc
-    warning_flags = ['/W3']
-  else
-    warning_flags = ['-Wall']
+if cpp_warnings == 'min'
+  if warning_level == 0
+    warning_flags = is_msvc ? ['/W2'] : ['-Wall']
+   endif
+elif cpp_warnings == 'max' or cpp_warnings == 'fatal'
+  if warning_level < 3
+    warning_flags = is_msvc ? ['/W4'] : ['-pedantic', '-Wall', '-Wextra']
   endif
-elif warning_level == 'max' or warning_level == 'fatal'
-  if is_msvc
-    warning_flags = ['/W4']
-  else
-    warning_flags = '-pedantic -Wall -Wextra -Wsuggest-override -Wshadow -Wzero-as-null-pointer-constant -Wformat-security'.split()
+  if not is_msvc
+    warning_flags += '-Wsuggest-override -Wshadow -Wzero-as-null-pointer-constant -Wformat-security'.split()
   endif
-  if warning_level == 'fatal'
-    if is_msvc
-      warning_flags += ['/WX']
-    else
-      warning_flags += ['-Werror']
-    endif
+  if cpp_warnings == 'fatal' and not werror
+      warning_flags += is_msvc ? ['/WX'] : ['-Werror']
   endif
 endif
 
@@ -182,11 +189,33 @@ add_project_arguments(warning_flags, language: 'cpp')
 
 # MSVC: Ignore warnings that aren't really harmful, but make those
 #       that should not be overlooked stand out.
+static_cxxflag = '-DLIBSIGCXX_STATIC'
 if is_msvc
-  foreach wd : ['/FImsvc_recommended_pragmas.h', '/EHsc', '/wd4267']
-    disabled_warning = cpp_compiler.get_supported_arguments(wd)
-    add_project_arguments(disabled_warning, language: 'cpp')
-  endforeach
+  disable_warnings_list = [
+    '/EHsc',  # avoid warnings caused by exception handling model used
+  ]
+
+  # Turn off harmless warnings but make potentially dangerous ones glaring,
+  # distributed with GLib, if available
+  use_recommended_pragmas =  cpp_compiler.get_supported_arguments('/FImsvc_recommended_pragmas.h')
+  if use_recommended_pragmas.length() > 0
+    add_project_arguments(use_recommended_pragmas, language: 'cpp')
+  else
+    disable_warnings_list += '/wd4244' # 'conversion' conversion from
+                                       # 'type1' to 'type2', possible loss of data
+  endif
+
+  if host_machine.cpu_family() == 'x86_64' or host_machine.cpu_family() == 'aarch64'
+    # 'var' : conversion from 'size_t' to 'type', possible loss of data (applies on 64-bit builds)
+    disable_warnings_list += '/wd4267'
+  endif
+  add_project_arguments(
+    cpp_compiler.get_supported_arguments(disable_warnings_list),
+    language: 'cpp'
+  )
+  if is_msvc_static
+    add_project_arguments(static_cxxflag, language: 'cpp')
+  endif
 endif
 
 # Configure files
@@ -202,7 +231,7 @@ pkg_conf_data.set('PACKAGE_VERSION', meson.project_version())
 pkg_conf_data.set('SIGCXX_API_VERSION', sigcxx_api_version)
 
 if not build_deprecated_api
-  pkg_conf_data.set('SIGCXX_DISABLE_DEPRECATED', true)
+  pkg_conf_data.set('SIGCXX_DISABLE_DEPRECATED', 1)
 endif
 pkg_conf_data.set('SIGCXX_MAJOR_VERSION', sigcxx_major_version)
 pkg_conf_data.set('SIGCXX_MINOR_VERSION', sigcxx_minor_version)
@@ -215,6 +244,7 @@ foreach conf_test : ['gcc_template_specialization_operator_overload',
     pkg_conf_data.set('SIGC_' + conf_test.to_upper(), true)
   endif
 endforeach
+pkg_conf_data.set('MSVC_STATIC_CXXFLAG', is_msvc_static ? static_cxxflag : '')
 
 configure_file(
   input: 'sigc++.pc.in',
@@ -229,9 +259,10 @@ configure_file(
   configuration: pkg_conf_data,
 )
 
+sigcxxconfig_h_meson = files('sigc++config.h.meson')
 install_includeconfigdir = install_libdir / sigcxx_pcname / 'include'
-sigcxxconfig_h = configure_file(
-  input: 'sigc++config.h.meson',
+configure_file(
+  input: sigcxxconfig_h_meson,
   output: 'sigc++config.h',
   configuration: pkg_conf_data,
   install_dir: install_includeconfigdir,
@@ -310,12 +341,14 @@ summary = [
   meson.project_name() + ' ' + meson.project_version(),
   '',
   '         Maintainer mode: @0@@1@'.format(maintainer_mode_opt, real_maintainer_mode),
-  '       Compiler warnings: @0@'.format(warning_level),
+  '       Compiler warnings: @0@ (warning_level: @1@, werror: @2@)'. \
+                             format(cpp_warnings, warning_level, werror),
   '    Build deprecated API: @0@'.format(build_deprecated_api),
   'Build HTML documentation: @0@@1@'.format(build_documentation_opt, real_build_documentation),
   '          XML validation: @0@@1@'.format(validate, explain_val),
   '               Build PDF: @0@@1@'.format(build_pdf, explain_pdf),
   '  Build example programs: @0@'.format(build_examples),
+  '     Build test programs: @0@'.format(build_tests),
   '               Benchmark: @0@'.format(do_benchmark),
   'Directories:',
   '                  prefix: @0@'.format(install_prefix),

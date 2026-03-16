@@ -1,3 +1,209 @@
+2023-10-01  Kjell Ahlstedt  <kjellahlstedt@gmail.com>
+
+  2.12.1
+
+2023-07-06  Kjell Ahlstedt  <kjellahlstedt@gmail.com>
+
+  Remove AUTHORS and add general information to README.md
+
+  See https://gitlab.gnome.org/GNOME/gtkmm/-/issues/140
+
+2023-06-27  Chun-wei Fan  <fanchunwei@src.gnome.org>
+
+  MSVC-Builds.md: Add info on CMake and Meson
+
+  Let people know it is also supported to build libsigc++ using CMake or Meson
+  with Visual Studio and the tools required for builds directly from GIT
+  checkouts
+
+2023-06-27  Chun-wei Fan  <fanchunwei@src.gnome.org>
+
+   Visual Studio builds: Convert build docs to MarkDown
+
+  Convert the README.txt to MarkDown format so that it is easier on the eye in
+  terms of formatting, and update some of the info:
+  
+  * Note that although Visual Studio 2013 is supported to build libsigc++, but
+    Visual Studio 2015 or later is likely needed to build packages that use
+    libsigc++
+  * ARM64 is actually supported
+  * Update info on build from GIT checkout.
+  * Move the part on static builds as appropriate
+  * Some other minor tweaks
+
+2023-06-26  Chun-wei Fan  <fanchunwei@src.gnome.org>
+
+  MSVC_NMake/README.txt: Mention about static builds
+
+2023-06-26  Chun-wei Fan  <fanchunwei@src.gnome.org>
+
+  sigc++.pc.in: Set -DLIBSIGCXX_STATIC in cxxflags as needed
+
+  Update the Meson build files to put in -DLIBSIGCXX_STATIC when we are building
+  a static build of libsigc++.
+  
+  For the autotools build, this is not used.
+
+2023-06-26  Chun-wei Fan  <fanchunwei@src.gnome.org>
+
+  NMake Makefiles: Accomodate static builds during "install"
+
+  Copy the built DLL and PDB only if building a shared build, and copy the
+  appropriate .lib file according to the build type.
+
+2023-06-26  Chun-wei Fan  <fanchunwei@src.gnome.org>
+
+  build: Actually support MSVC static builds
+
+  Apply -DLIBSIGCXX_STATIC as appropriate when we request a static build to be
+  done for the Meson and NMake builds, and skip building the version .rc file
+  if a static build is requested.
+  
+  For the NMake builds, separate the build artifacts from the static and shared
+  builds.
+  
+  The autotools builds since it is not used for Visual Studio builds at all.
+
+2023-06-26  Chun-wei Fan  <fanchunwei@src.gnome.org>
+
+  build: Drop _WINDLL from sigc++config.h.[in|meson]
+
+  ...and add a new check macro LIBSIGCXX_STATIC, to use the appropriate macros to
+  build and link against libsigc++. Drop this from the build files as well.
+
+2023-06-26  Chun-wei Fan  <fanchunwei@src.gnome.org>
+
+  meson: Disallow default_library == 'both' on Visual Studio
+
+  We need different defines/cflags for building static and shared builds of
+  libsigc++, so we can't really support default_library = 'both' for libsigc++
+  without much retinkering.
+  
+  So, just disallow such builds at least for now.
+  
+  Also, save up whether we are attempting a static build in the Visual Studio
+  build.
+
+2023-05-31  Kjell Ahlstedt  <kjellahlstedt@gmail.com>
+
+  connection: Improve the class documentation
+
+  Fixes #88
+
+2023-05-27  Kjell Ahlstedt  <kjellahlstedt@gmail.com>
+
+  slot, signal docs: Describe the slot<void(int)> syntax more
+
+  See #86
+
+2023-05-27  Kjell Ahlstedt  <kjellahlstedt@gmail.com>
+
+  Doxyfile.in: Remove obsolete entries
+
+2023-04-03  Kjell Ahlstedt  <kjellahlstedt@gmail.com>
+
+  README.md: meson -> meson setup
+
+2023-04-03  Kjell Ahlstedt  <kjellahlstedt@gmail.com>
+
+  meson.build: Simplify if-file-exists test
+
+2023-01-04  Kjell Ahlstedt  <kjellahlstedt@gmail.com>
+
+  meson.build: Fix the evaluation of is_git_build on Windows
+
+  See gtkmm#131
+
+2023-01-04  Kjell Ahlstedt  <kjellahlstedt@gmail.com>
+
+  Meson build: Don't copy files with configure_file()
+
+  It's deprecated from Meson 0.64. The replacement, fs.copyfile(),
+  is not useful here. It only copies from the source directory to
+  the build directory.
+
+2022-12-23  Kjell Ahlstedt  <kjellahlstedt@gmail.com>
+
+  2.12.0
+
+2022-11-07  Kjell Ahlstedt  <kjellahlstedt@gmail.com>
+
+  Meson build: Always call subdir('tests')
+
+  Make the build_tests check more like the check in cairomm and libxml++.
+  Then it's possible to combine build-tests=false with benchmark=true.
+  See PR #84
+
+2022-11-07  Fabrice Fontaine  <fontaine.fabrice@gmail.com>
+
+  add build_tests option
+
+  Allow the user to disable build of test programs
+  
+  Signed-off-by: Fabrice Fontaine <fontaine.fabrice@gmail.com>
+
+2022-11-07  wael  <40663@proton.me>
+
+  meson: simplify lookup of python command
+
+2022-09-27  Kjell Ahlstedt  <kjellahlstedt@gmail.com>
+
+  meson.build: Detect if we build from a git subtree
+
+  See https://gitlab.gnome.org/GNOME/gtkmm/-/merge_requests/72 (William Roy)
+
+2022-08-15  Kjell Ahlstedt  <kjellahlstedt@gmail.com>
+
+  Fix build with -Dbuild-deprecated-api=false
+
+  Fixes #82
+
+2022-07-20  Kjell Ahlstedt  <kjellahlstedt@gmail.com>
+
+  Convert README to README.md
+
+2022-05-30  Kjell Ahlstedt  <kjellahlstedt@gmail.com>
+
+  test_limit_reference.cc: Don't use auto where a slot is required
+
+  The return values of sigc::bind() and sigc::bind_return() shall be
+  converted to sigc::slot, otherwise automatic disconnection does not work.
+  Fixes #44
+
+2022-05-24  Chun-wei Fan  <fanchunwei@src.gnome.org>
+
+  Meson/MSVC: Re-organize warnings-related compiler flags
+
+  Add a short description for each of the warnings-related compiler flags that we
+  are using.
+  
+  Also, only apply '/wd4267' for 64-bit builds, since it is a warning that should
+  only be related to 64-bit builds.
+
+2022-05-23  Chun-wei Fan  <fanchunwei@src.gnome.org>
+
+  Meson: Compensate for the lack of msvc_recommended_pragmas.h
+
+  libsigc++ does not depend on GLib, so msvc_recommended_pragmas.h may not be
+  available.  If it isn't, disable warning C4244 to compensate for it.
+
+2022-05-17  Kjell Ahlstedt  <kjellahlstedt@gmail.com>
+
+  meson.build: Avoid configuration warnings
+
+2022-04-27  Kjell Ahlstedt  <kjellahlstedt@gmail.com>
+
+  examples/member_method: Make on_print() non-virtual
+
+  so it can be compiled with the -Wnon-virtual-dtor compiler option.
+
+2022-04-20  Kjell Ahlstedt  <kjellahlstedt@gmail.com>
+
+  Add track_object(), deprecate track_obj()
+
+  track_object() checks that the listed objects derive from sigc::trackable.
+  Fixes #78
+
 2022-02-11  Kjell Ahlstedt  <kjellahlstedt@gmail.com>
 
   2.10.8
@@ -1155,269 +1361,4 @@
   being generated automatically. These are never used, but this
   will make sure of that.
   See https://bugzilla.gnome.org/show_bug.cgi?id=756484#c5
-
-2015-11-06  Murray Cumming  <murrayc@murrayc.com>
-
-  Small whitespace changes in docs comment.
-
-2015-10-31  Kjell Ahlstedt  <kjell.ahlstedt@bredband.net>
-
-  trackable: Add a comment
-
-2015-10-21  Kjell Ahlstedt  <kjell.ahlstedt@bredband.net>
-
-  slot and signal: Fix move constructors and move assignments
-
-  * sigc++/functors/macros/slot.h.m4: Add documentation.
-  * sigc++/functors/slot_base.[h|cc]: Fix the move operators of slot_base.
-  Don't move a connected slot.
-  * sigc++/signal_base.cc: Fix the move assignment of signal_base.
-  * tests/test_signal_move.cc:
-  * tests/test_slot_move.cc: Really test move assignment. Bug #756484.
-
-2015-10-13  Kjell Ahlstedt  <kjell.ahlstedt@bredband.net>
-
-  More use of nullptr instead of 0
-
-2015-10-11  Kjell Ahlstedt  <kjell.ahlstedt@bredband.net>
-
-  slot_rep::disconnect(): Remove a comment, add a test
-
-  * sigc++/functors/slot_base.cc: Remove a TODO comment at slot_rep::disconnect().
-  * tests/test_slot_disconnect.cc: Add a test that assigns an empty slot.
-
-2015-09-29  Kjell Ahlstedt  <kjell.ahlstedt@bredband.net>
-
-  Update sigc++/.gitignore
-
-2015-09-27  Murray Cumming  <murrayc@murrayc.com>
-
-  2.6.1
-
-2015-09-26  Kjell Ahlstedt  <kjell.ahlstedt@bredband.net>
-
-  sigc::trackable: Don't move the callback list
-
-  * sigc++/trackable.[h|cc]: Don't move the callback list.
-  * tests/test_trackable_move.cc: Remove a comment. Bug #755393.
-
-2015-09-26  Kjell Ahlstedt  <kjell.ahlstedt@bredband.net>
-
-  Recreate adaptors/lambda files necessary not to break ABI
-
-  * sigc++/adaptors/lambda/macros/base.h.m4:
-  * sigc++/adaptors/lambda/macros/lambda.cc.m4:
-  * sigc++/adaptors/lambda/macros/select.h.m4: Recreate these files.
-  * sigc++/Makefile.am:
-  * sigc++/filelist.am: Add the recreated lambda files.
-  Approximately a reversion of commit a259b4c7a1753dbc389ee467fa536339ec820223,
-  "Remove remaining parts of the sigc::lambda API."
-  Differences from an exact reversion: MSVC_Net files are not modified.
-  (Probably something ought to be changed in MSVC_Net2013.)
-  tests/Makefile.am is not modified-
-  is_base_and_derived<> is replaced by std::is_base_of<> in base.h.m4.
-  The extern declarations that were previously in select.h.m4 are moved to
-  lambda.cc.m4. Without them, sigc::_1 .. sigc::_7 are not included in
-  the .so file.
-  All code in the header files are inside #ifndef DOXYGEN_SHOULD_SKIP_THIS.
-  Bug #755550.
-
-2015-09-21  Murray Cumming  <murrayc@murrayc.com>
-
-  2.6.0
-
-2015-09-17  Murray Cumming  <murrayc@murrayc.com>
-
-  C++11: deduce_result_type: Simpifying, removing use of std::is_same().
-
-  See https://bugzilla.gnome.org/show_bug.cgi?id=753612#c9
-
-2015-09-17  Marcin Kolny  <marcin.kolny@gmail.com>
-
-  C++11: deduce_result_type: build fix, using SFINAE paradigm.
-
-  Bug #753612
-
-2015-09-17  Murray Cumming  <murrayc@murrayc.com>
-
-  C++11: deduce_result_type: Simplify with variadic template and std::conditional<>.
-
-  Bug #753612
-  However, the build then fails like so:
-  
-  make[2]: Entering directory '/home/murrayc/checkout/gnome/libsigc++2/examples'
-  g++ -DHAVE_CONFIG_H   -I.. -I..  -pedantic -Wall -Wextra -Wshadow -Wformat-security -Werror -Wall -g -O0 -std=c++11 -MT hello_world.o -MD -MP -MF .deps/hello_world.Tpo -c -o hello_world.o hello_world.cc
-  In file included from ../sigc++/adaptors/adaptor_trait.h:10:0,
-                   from ../sigc++/functors/slot.h:7,
-                   from ../sigc++/signal_base.h:27,
-                   from ../sigc++/signal.h:8,
-                   from ../sigc++/sigc++.h:86,
-                   from hello_world.cc:10:
-  ../sigc++/adaptors/deduce_result_type.h: In instantiation of ‘struct sigc::deduce_result_type<sigc::pointer_functor1<const std::basic_string<char>&, void>, const std::basic_string<char, std::char_traits<char>, std::allocator<char> >&, void, void, void, void, void, void>’:
-  ../sigc++/adaptors/deduce_result_type.h:60:80:   required by substitution of ‘template<class T_functor, class ... T_args> using deduce_result_t = typename sigc::deduce_result_type::type [with T_functor = sigc::pointer_functor1<const std::basic_string<char>&, void>; T_args = {const std::basic_string<char, std::char_traits<char>, std::allocator<char> >&, void, void, void, void, void, void}]’
-  ../sigc++/adaptors/adaptor_trait.h:67:104:   required from ‘struct sigc::adaptor_functor<sigc::pointer_functor1<const std::basic_string<char>&, void> >::deduce_result_type<const std::basic_string<char>&, void, void, void, void, void, void>’
-  ../sigc++/adaptors/adaptor_trait.h:88:3:   required by substitution of ‘template<class T_arg1> typename sigc::adaptor_functor<T_functor>::deduce_result_type<T_arg1>::type sigc::adaptor_functor<T_functor>::operator()(T_arg1) const [with T_arg1 = const std::basic_string<char>&]’
-  ../sigc++/functors/slot.h:137:20:   required from ‘static T_return sigc::internal::slot_call1<T_functor, T_return, T_arg1>::call_it(sigc::internal::slot_rep*, sigc::type_trait_take_t<T_arg3>) [with T_functor = sigc::pointer_functor1<const std::basic_string<char>&, void>; T_return = void; T_arg1 = const std::basic_string<char>&; sigc::type_trait_take_t<T_arg3> = const std::basic_string<char>&]’
-  ../sigc++/functors/slot.h:144:37:   required from ‘static void* (* sigc::internal::slot_call1<T_functor, T_return, T_arg1>::address())(void*) [with T_functor = sigc::pointer_functor1<const std::basic_string<char>&, void>; T_return = void; T_arg1 = const std::basic_string<char>&; sigc::internal::hook = void* (*)(void*)]’
-  ../sigc++/functors/slot.h:529:91:   required from ‘sigc::slot1<T_return, T_arg1>::slot1(const T_functor&) [with T_functor = sigc::pointer_functor1<const std::basic_string<char>&, void>; T_return = void; T_arg1 = const std::basic_string<char>&]’
-  ../sigc++/functors/slot.h:1161:26:   required from ‘sigc::slot<T_return, T_arg1, sigc::nil, sigc::nil, sigc::nil, sigc::nil, sigc::nil, sigc::nil>::slot(const T_functor&) [with T_functor = sigc::pointer_functor1<const std::basic_string<char>&, void>; T_return = void; T_arg1 = const std::basic_string<char>&]’
-  hello_world.cc:25:50:   required from here
-  ../sigc++/adaptors/deduce_result_type.h:56:12: error: no class template named ‘deduce_result_type’ in ‘class sigc::pointer_functor1<const std::basic_string<char>&, void>’
-       >::type;
-              ^
-  In file included from ../sigc++/signal_base.h:27:0,
-                   from ../sigc++/signal.h:8,
-                   from ../sigc++/sigc++.h:86,
-                   from hello_world.cc:10:
-  ../sigc++/functors/slot.h: In instantiation of ‘static T_return sigc::internal::slot_call1<T_functor, T_return, T_arg1>::call_it(sigc::internal::slot_rep*, sigc::type_trait_take_t<T_arg3>) [with T_functor = sigc::pointer_functor1<const std::basic_string<char>&, void>; T_return = void; T_arg1 = const std::basic_string<char>&; sigc::type_trait_take_t<T_arg3> = const std::basic_string<char>&]’:
-  ../sigc++/functors/slot.h:144:37:   required from ‘static void* (* sigc::internal::slot_call1<T_functor, T_return, T_arg1>::address())(void*) [with T_functor = sigc::pointer_functor1<const std::basic_string<char>&, void>; T_return = void; T_arg1 = const std::basic_string<char>&; sigc::internal::hook = void* (*)(void*)]’
-  ../sigc++/functors/slot.h:529:91:   required from ‘sigc::slot1<T_return, T_arg1>::slot1(const T_functor&) [with T_functor = sigc::pointer_functor1<const std::basic_string<char>&, void>; T_return = void; T_arg1 = const std::basic_string<char>&]’
-  ../sigc++/functors/slot.h:1161:26:   required from ‘sigc::slot<T_return, T_arg1, sigc::nil, sigc::nil, sigc::nil, sigc::nil, sigc::nil, sigc::nil>::slot(const T_functor&) [with T_functor = sigc::pointer_functor1<const std::basic_string<char>&, void>; T_return = void; T_arg1 = const std::basic_string<char>&]’
-  hello_world.cc:25:50:   required from here
-  ../sigc++/functors/slot.h:137:20: error: no matching function for call to ‘sigc::adaptor_functor<sigc::pointer_functor1<const std::basic_string<char>&, void> >::operator()(const std::basic_string<char>&)’
-                  (a_1);
-                      ^
-  ../sigc++/functors/slot.h:137:20: note: candidates are:
-  In file included from ../sigc++/functors/slot.h:7:0,
-                   from ../sigc++/signal_base.h:27,
-                   from ../sigc++/signal.h:8,
-                   from ../sigc++/sigc++.h:86,
-                   from hello_world.cc:10:
-  ../sigc++/adaptors/adaptor_trait.h:88:3: note: template<class T_arg1> typename sigc::adaptor_functor<T_functor>::deduce_result_type<T_arg1>::type sigc::adaptor_functor<T_functor>::operator()(T_arg1) const [with T_arg1 = T_arg1; T_functor = sigc::pointer_functor1<const std::basic_string<char>&, void>]
-     operator()(T_arg1 _A_arg1) const
-     ^
-  ../sigc++/adaptors/adaptor_trait.h:88:3: note:   substitution of deduced template arguments resulted in errors seen above
-  ../sigc++/adaptors/adaptor_trait.h:107:3: note: template<class T_arg1, class T_arg2> typename sigc::adaptor_functor<T_functor>::deduce_result_type<T_arg1, T_arg2>::type sigc::adaptor_functor<T_functor>::operator()(T_arg1, T_arg2) const [with T_arg1 = T_arg1; T_arg2 = T_arg2; T_functor = sigc::pointer_functor1<const std::basic_string<char>&, void>]
-     operator()(T_arg1 _A_arg1, T_arg2 _A_arg2) const
-     ^
-  ../sigc++/adaptors/adaptor_trait.h:107:3: note:   template argument deduction/substitution failed:
-  In file included from ../sigc++/signal_base.h:27:0,
-                   from ../sigc++/signal.h:8,
-                   from ../sigc++/sigc++.h:86,
-                   from hello_world.cc:10:
-  ../sigc++/functors/slot.h:137:20: note:   candidate expects 2 arguments, 1 provided
-                  (a_1);
-                      ^
-
-2015-09-11  Chun-wei Fan  <fanchunwei@src.gnome.org>
-
-  MSVC Builds: Add "Install" Project
-
-  This makes building the -mm stack easier by copying the headers and the
-  built DLL, PDB and LIB files to a location where it can be picked up by
-  the gtkmm stack automatically, when they are extracted in a common
-  directory.  This is what is currently done with the GTK+ and Clutter
-  stacks for Visual Studio builds.
-
-2015-09-09  Chun-wei Fan  <fanchunwei@src.gnome.org>
-
-  Update README on Visual Studio Builds
-
-  Since the Visual Studio project files and the related sources have been
-  updated to work with Visual Studio 2013, and that the test programs do
-  run well there, update the README file to let people know the situation.
-  
-  https://bugzilla.gnome.org/show_bug.cgi?id=754082
-
-2015-09-09  Chun-wei Fan  <fanchunwei@src.gnome.org>
-
-  sigc++config.h.in: Allow Build for MSVC 2013
-
-  MSVC 2013 does not have the C++-11 noexcept, so we need to define that to
-  _NOEXCEPT for MSVC 2013.  Plus, since by default MSVC 2013 does not allow
-  us to re-define keywords, though they may or may not be supported, we need
-  to use the _ALLOW_KEYWORD_MACROS macro to allow this to happen.
-  
-  https://bugzilla.gnome.org/show_bug.cgi?id=754082
-
-2015-09-08  Kjell Ahlstedt  <kjell.ahlstedt@bredband.net>
-
-  Update source of web page
-
-  * docs/website/fragments/footer.html_fragment:
-  * docs/website/fragments/html_declaration.html_fragment:
-  * docs/website/devel.shtml:
-  * docs/website/doc.shtml:
-  * docs/website/index.shtml:
-  * docs/website/link.shtml:
-  * docs/website/stable.shtml: Fix or remove broken links. Remove the lists of
-  supported compilers. Mention that a C++11 compiler is required and that
-  support for lambdas has been removed. Bug #754082.
-
-2015-09-07  Kjell Ahlstedt  <kjell.ahlstedt@bredband.net>
-
-  Update .gitignore
-
-2015-09-03  Murray Cumming  <murrayc@murrayc.com>
-
-  2.5.4
-
-2015-09-03  Murray Cumming  <murrayc@murrayc.com>
-
-  Update tests/.gitignore
-
-2015-09-02  Chun-wei Fan  <fanchunwei@src.gnome.org>
-
-  MSVC Builds: Use Windows Line Endings for .sln
-
-  The .sln files need to have Windows/DOS line endings to work properly so
-  that Windows can detect the Visual Studio version of the solution file.
-
-2015-09-02  Chun-wei Fan  <fanchunwei@src.gnome.org>
-
-  MSVC Builds: Add Forgotten Files
-
-  The MSVC projects now use property sheets, but they were forgotten from
-  dist in the previous commits.  Dist them... sorry!
-
-2015-09-02  Chun-wei Fan  <fanchunwei@src.gnome.org>
-
-  MSVC Builds: Remove MSVC 2005 and 2008 projects
-
-  They are now unable to build libsigc++ at all, so drop them.
-  
-  https://bugzilla.gnome.org/show_bug.cgi?id=754082
-
-2015-09-02  Chun-wei Fan  <fanchunwei@src.gnome.org>
-
-  MSVC Builds: Rename MSVC_Net2010/ to MSVC_Net2013/
-
-  Since libsigc++ now requires MSVC 2013 to build, the MSVC_Net2010 directory
-  needs to be renamed to MSVC_Net2013, so that people will not be confused on
-  what MSVC version is needed to build libsigc++.  Also remove MSVC_Net2005
-  and MSVC_Net2008 from the distribution, as they are no longer able to build
-  libsigc++.
-  
-  https://bugzilla.gnome.org/show_bug.cgi?id=754082
-
-2015-09-01  Murray Cumming  <murrayc@murrayc.com>
-
-  signal_base, trackable: Make move operations noexcept.
-
-2015-09-01  Murray Cumming  <murrayc@murrayc.com>
-
-  Added test_signal_move.
-
-  This seems to work.
-
-2015-09-01  Murray Cumming  <murrayc@murrayc.com>
-
-  Added test_slot_move
-
-  This seems to do what it should, acting much like regular slot copying.
-
-2015-09-01  Murray Cumming  <murrayc@murrayc.com>
-
-  Add test_trackable_move.
-
-  It doesn't segfault, but I'm not sure it's doing what it should.
-  See the TODO.
-
-2015-09-01  Murray Cumming  <murrayc@murrayc.com>
-
-  trackable: move constructor: null the src.
-
-2015-09-01  Murray Cumming  <murrayc@murrayc.com>
-
-  trackable: move assignment operator: null the src.
 
